@@ -88,27 +88,29 @@ class Set
     {
         if (is_sharer && ++counter >= max_count)
         {
+            unsigned int group_size = m_nSize / max_count;
+            printf("Size = %i, index = %u, max count = %i, group = %u\n", 
+                m_nSize, index, max_count, group_size);
             printf("Before (%i): ", count());
             print(std::cout);
             printf("\n");
             // create bits_coarse
-            int group_size = m_nSize / max_count;
             if (!is_coarse)
             {
                 is_coarse = true;
                 bits_coarse.reset();
-                for (int i = 0; i < m_nSize; i++)
+                for (unsigned int i = 0; i < m_nSize; i++)
                     if (bits[i])
                         bits_coarse.set(i / group_size);
 
                 bits.reset();
-                for (int i = 0; i < max_count; i++)
+                for (unsigned int i = 0; i < max_count; i++)
                     if (bits_coarse[i])
-                        for (int offset = 0; offset < group_size; offset++)
+                        for (unsigned int offset = 0; offset < group_size; offset++)
                             bits.set(i + offset);
             }
             bits_coarse.set(index / group_size);
-            for (int offset = 0; offset < group_size; offset++)
+            for (unsigned int offset = 0; offset < group_size; offset++)
                 bits.set(index + offset);
 
             printf("After (%i):", count());
