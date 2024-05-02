@@ -51,12 +51,16 @@ class Set
     // Number of bits in use in this set.
     // can be defined in build_opts file (default=64).
     int m_nSize;
+    int counter;
+    int max_count;
+    bool is_coarse;
     std::bitset<NUMBER_BITS_PER_SET> bits;
+    std::bitset<NUMBER_BITS_PER_SET> bits_coarse;
 
   public:
-    Set() : m_nSize(0) {}
+    Set() : m_nSize(0), counter(0), max_count(0), is_coarse(false) {}
 
-    Set(int size) : m_nSize(size)
+    Set(int size) : m_nSize(size), counter(0), max_count(0), is_coarse(false)
     {
         if (size > NUMBER_BITS_PER_SET)
             fatal("Number of bits(%d) < size specified(%d). "
@@ -64,20 +68,61 @@ class Set
                   NUMBER_BITS_PER_SET, size);
     }
 
-    Set(const Set& obj) : m_nSize(obj.m_nSize), bits(obj.bits) {}
+    Set(const Set& obj) : m_nSize(obj.m_nSize), bits(obj.bits), bits_coarse(obj.bits_coarse),
+                          counter(obj.counter), is_coarse(obj.is_coarse), max_count(obj.max_count) {}
     ~Set() {}
 
     Set& operator=(const Set& obj)
     {
         m_nSize = obj.m_nSize;
         bits = obj.bits;
+        bits_coarse = obj.bits_coarse;
+        counter = obj.counter;
+        is_coarse = obj.is_coarse;
+        max_count = obj.max_count;
         return *this;
     }
 
     void
-    add(NodeID index)
+    add(NodeID index, bool is_sharer=false)
     {
-        bits.set(index);
+        if (is_sharer && ++counter >= max_count)
+        {
+            printf("Before (%i): ", count());
+            print(std::cout);
+            printf("\n");
+            // create bits_coarse
+            int group_size = m_nSize / max_count;
+            if (!is_coarse)
+            {
+                is_coarse = true;
+                bits_coarse.reset();
+                for (int i = 0; i < m_nSize; i++)
+                    if (bits[i])
+                        bits_coarse.set(i / group_size);
+
+                bits.reset();
+                for (int i = 0; i < max_count; i++)
+                    if (bits_coarse[i])
+                        for (int offset = 0; offset < group_size; offset++)
+                            bits.set(i + offset);
+            }
+            bits_coarse.set(index / group_size);
+            for (int offset = 0; offset < group_size; offset++)
+                bits.set(index + offset);
+
+            printf("After (%i):", count());
+            print(std::cout);
+            printf("\n");
+        }
+        else
+            bits.set(index);
+    }
+
+    void
+    setMaxCount(int max_count_)
+    {
+        max_count = max_count_;
     }
 
     /*
@@ -95,9 +140,26 @@ class Set
      * This function clears bits that are =1 in the parameter set
      */
     void
-    remove(NodeID index)
+    remove(NodeID index, bool is_sharer=false)
     {
-        bits.reset(index);
+        if (is_sharer)
+        {
+            int group_size = m_nSize / max_count;
+            if (is_coarse)
+            {
+                bits_coarse.reset(index / group_size);
+                for (int offset = 0; offset < group_size; offset++)
+                    bits.reset(index + offset);
+            }
+            else
+            {
+                bits.reset(index);
+            }
+        }
+        else
+        {
+            bits.reset(index);
+        }
     }
 
     /*
@@ -110,7 +172,7 @@ class Set
         bits &= (~obj.bits);
     }
 
-    void clear() { bits.reset(); }
+    void clear() { bits.reset(); bits_coarse.reset(); }
 
     /*
      * this function sets all bits in the set
@@ -118,6 +180,7 @@ class Set
     void broadcast()
     {
         bits.set();
+        bits_coarse.set();
         for (int j = m_nSize; j < NUMBER_BITS_PER_SET; ++j) {
             bits.reset(j);
         }
@@ -216,6 +279,7 @@ class Set
                   NUMBER_BITS_PER_SET, size);
         m_nSize = size;
         bits.reset();
+        bits_coarse.reset();
     }
 
     void print(std::ostream& out) const

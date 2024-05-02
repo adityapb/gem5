@@ -79,9 +79,9 @@ external_type(MachineID);
 
 structure (Set, external = "yes", non_obj="yes") {
   void setSize(int);
-  void add(NodeID);
+  void add(NodeID, bool);
   void addSet(Set);
-  void remove(NodeID);
+  void remove(NodeID, bool);
   void removeSet(Set);
   void broadcast();
   void addRandom();
@@ -99,6 +99,7 @@ structure (NetDest, external = "yes", non_obj="yes") {
   void setSize(int, int);
   void add(NodeID);
   void add(MachineID);
+  void add(MachineID, bool);
   void addSet(Set);
   void addNetDest(NetDest);
   void setNetDest(MachineType, Set);

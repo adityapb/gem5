@@ -55,7 +55,7 @@ system = System()
 
 # Set the clock frequency of the system (and all of its children)
 system.clk_domain = SrcClockDomain()
-system.clk_domain.clock = "1GHz"
+system.clk_domain.clock = "3GHz"
 system.clk_domain.voltage_domain = VoltageDomain()
 
 # Set up the system
@@ -84,7 +84,7 @@ thispath = os.path.dirname(os.path.realpath(__file__))
 binary = os.path.join(
     thispath,
     "../../../",
-    "tests/test-progs/threads/bin/x86/linux/threads",
+    "tests/test-progs/npb/cg.S.x",
 )
 
 # Create a process for a simple "multi-threaded" application

@@ -55,6 +55,7 @@ class NetDest
     ~NetDest()
     { }
 
+    void add(MachineID newElement, bool is_sharer);
     void add(MachineID newElement);
     void addNetDest(const NetDest& netDest);
     void setNetDest(MachineType machine, const Set& set);

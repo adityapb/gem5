@@ -166,6 +166,9 @@ processor = SimpleSwitchableProcessor(
 
 # Here we setup the board. The X86Board allows for Full-System X86 simulations
 
+for proc in processor.start:
+    proc.core.usePerf = False
+
 board = X86Board(
     clk_freq="3GHz",
     processor=processor,

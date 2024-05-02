@@ -189,7 +189,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     assert(is_valid(cache_entry));
     DPRINTF(RubySlicc, "machineID: %s, requestor: %s, address: %#x\n",
             machineID, requestor, addr);
-    cache_entry.Sharers.add(requestor);
+    cache_entry.Sharers.add(requestor, true);
   }
 
   State getState(TBE tbe, Entry cache_entry, Addr addr) {

@@ -109,6 +109,7 @@ WeightBased::findRoute(const Message &msg,
                        std::vector<RouteInfo> &out_links) const
 {
     NetDest msg_dsts = msg.getDestination();
+    int count = msg_dsts.count();
     assert(out_links.size() == 0);
     for (auto &link : m_links) {
         const NetDest &dst = link->m_routing_entry;
@@ -124,6 +125,8 @@ WeightBased::findRoute(const Message &msg,
         }
     }
 
+    if (msg_dsts.count() != 0)
+        printf("Messge count after = %i, before = %i\n", msg_dsts.count(), count);
     gem5_assert(msg_dsts.count() == 0);
 }
 

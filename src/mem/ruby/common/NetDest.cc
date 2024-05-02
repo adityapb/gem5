@@ -42,6 +42,13 @@ NetDest::NetDest()
 }
 
 void
+NetDest::add(MachineID newElement, bool is_sharer)
+{
+    assert(bitIndex(newElement.num) < m_bits[vecIndex(newElement)].getSize());
+    m_bits[vecIndex(newElement)].add(bitIndex(newElement.num), is_sharer=is_sharer);
+}
+
+void
 NetDest::add(MachineID newElement)
 {
     assert(bitIndex(newElement.num) < m_bits[vecIndex(newElement)].getSize());
@@ -257,6 +264,7 @@ NetDest::resize()
 
     for (int i = 0; i < m_bits.size(); i++) {
         m_bits[i].setSize(MachineType_base_count((MachineType)i));
+        m_bits[i].setMaxCount(MachineType_base_count((MachineType)i) / 4);
     }
 }
 
